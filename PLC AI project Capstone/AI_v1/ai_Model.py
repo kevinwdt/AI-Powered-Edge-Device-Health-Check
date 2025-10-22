@@ -22,7 +22,24 @@
 from base_Service import BaseService
 
 class AIModel(BaseService):
-    """Empty AI model service skeleton."""
+    """
+    AI model service skeleton:
+    - load/receive data
+    - preprocess/normalize
+    - split train/test
+    - train RandomForest
+    - evaluate (accuracy, classification report)
+    - save/load artifacts (scaler + model)
+    - predict on new samples
+
+    Follows the doc’s steps:
+    prepare data → clean/split → train RF →
+    evaluate (accuracy/precision/recall/F1) →
+    feature importance → deploy (save .pkl)
+
+    Empty AI model service skeleton.
+    """
+    
     def __init__(self):
         super().__init__("AIModel")
 
