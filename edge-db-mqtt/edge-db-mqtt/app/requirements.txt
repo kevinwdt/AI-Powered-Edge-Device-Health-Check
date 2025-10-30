@@ -1,7 +1,0 @@
-fastapi
-uvicorn[standard]
-pydantic
-jsonschema
-python-dotenv
-requests
-paho-mqtt
