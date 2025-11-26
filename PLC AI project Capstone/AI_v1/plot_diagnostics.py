@@ -1,4 +1,10 @@
-import pandas as pd
+# Generate graphs from Diagnostic_Data.csv
+# Use Graph to analyze treds in memory, CPU, storage, temperature
+# Includes four separate plots and one combined plot
+# Kevin Wang
+
+
+# import pandas as pd
 import matplotlib.pyplot as plt
 
 # ------- LOAD CSV -------
