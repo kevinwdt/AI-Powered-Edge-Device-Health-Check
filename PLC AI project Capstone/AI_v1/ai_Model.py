@@ -1,28 +1,11 @@
 # ai_model.py
 # Kevin Model
 
-# from __future__ import annotations
 import os
 import pickle
 from typing import List, Dict, Any, Tuple
 from dataclasses import dataclass
 
-# import os
-# import pickle
-# from dataclasses import dataclass
-# from typing import Optional, Tuple, List, Any
-
-# import numpy as np
-
-# try:
-#     import pandas as pd
-# except Exception:  # pragma: no cover
-#     pd = None  # can remove pandas if only use numpy arrays
-
-# from sklearn.model_selection import train_test_split, cross_val_score
-# from sklearn.preprocessing import MinMaxScaler
-# from sklearn.ensemble import RandomForestClassifier
-# from sklearn.metrics import accuracy_score, classification_report
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.ensemble import RandomForestClassifier
@@ -35,11 +18,14 @@ from base_Service import BaseService
 class AIModel(BaseService):
     """
     AI model service skeleton:
-@@ -32,16 +26,17 @@ class AIModel(BaseService):
+    - load/receive data
+    - preprocess/normalize
+    - split train/test
+    - train RandomForest
+    - evaluate (accuracy, classification report)
     - save/load artifacts (scaler + model)
     - predict on new samples
 
-    Follows the doc’s steps:
     Follows the docs steps:
     prepare data → clean/split → train RF →
     evaluate (accuracy/precision/recall/F1) →
@@ -47,15 +33,15 @@ class AIModel(BaseService):
 
     Empty AI model service skeleton.
     """
-
-    def __init__(self):
+    
     def __init__(self, model_path: str = "model.pkl"):
         super().__init__("AIModel")
         self.model_path = model_path
 
     def start(self) -> None:
         super().start()
-@@ -50,3 +45,35 @@ def start(self) -> None:
+        # TODO: load AI model resources
+
     def stop(self) -> None:
         # TODO: release AI model resources
         super().stop()
