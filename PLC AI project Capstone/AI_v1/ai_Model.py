@@ -1,79 +1,93 @@
-# ai_model.py
-# Kevin Model
-
-import os
-import pickle
-from typing import List, Dict, Any, Tuple
-from dataclasses import dataclass
-
-import numpy as np
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, classification_report
-from sklearn.model_selection import train_test_split
-
-from base_Service import BaseService
+# Generate graphs from Diagnostic_Data.csv
+# Use Graph to analyze treds in memory, CPU, storage, temperature
+# Includes four separate plots and one combined plot
+# Kevin Wang
 
 
-class AIModel(BaseService):
-    """
-    AI model service skeleton:
-    - load/receive data
-    - preprocess/normalize
-    - split train/test
-    - train RandomForest
-    - evaluate (accuracy, classification report)
-    - save/load artifacts (scaler + model)
-    - predict on new samples
+# import pandas as pd
+import matplotlib.pyplot as plt
 
-    Follows the docs steps:
-    prepare data → clean/split → train RF →
-    evaluate (accuracy/precision/recall/F1) →
-    feature importance → deploy (save .pkl)
+# ------- LOAD CSV -------
+df = pd.read_csv("Diagnostic_Data/Diagnostic_Data.csv", low_memory=False)
 
-    Empty AI model service skeleton.
-    """
-    
-    def __init__(self, model_path: str = "model.pkl"):
-        super().__init__("AIModel")
-        self.model_path = model_path
+# ------- CLEAN DATA (remove null rows) -------
+df = df.dropna(subset=[
+    "totalmemory", "remainingmemory",
+    "cpuusage", "temperature",
+    "storagetotal", "remainingstorage",
+    "unixtime"
+])
 
-    def start(self) -> None:
-        super().start()
-        # TODO: load AI model resources
+# ------- COMPUTE NEW COLUMNS -------
+df["used_memory"] = df["totalmemory"] - df["remainingmemory"]
+df["used_storage"] = df["storagetotal"] - df["remainingstorage"]
 
-    def stop(self) -> None:
-        # TODO: release AI model resources
-        super().stop()
+# ------- CONVERT TIMESTAMP (NOT UNIX!) -------
+df["timestamp"] = pd.to_datetime(df["unixtime"], errors="coerce")
 
-    # -----------------------------------------------------------------
-    # Training
-    # -----------------------------------------------------------------
+# Remove any bad timestamps
+df = df.dropna(subset=["timestamp"])
 
-    def train(self, rows: list[Dict[str, any]], feature_keys: list[str], label_key: str) -> None:
-        """
-        Train the AI model from given data rows.
-        :param rows: List of data rows (dicts)
-        :param feature_keys: List of keys to use as features
-        :param label_key: Key to use as label
-        """
-        pass  # TODO: implement training logic
+# ------- SORT BY TIME -------
+df = df.sort_values("timestamp")
 
-        x : list = [] # ML features as float
-        y : list = [] # ML Labels to int 0, 1, 2
-        label_to_id : Dict[str, int] = {}
-        next_id : int = 0
+# ------- PLOT #1: Used Memory -------
+plt.figure(figsize=(10,4))
+plt.scatter(df["timestamp"], df["used_memory"], s=10)
+plt.title("Used Memory vs Time")
+plt.xlabel("Time")
+plt.ylabel("Used Memory")
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
 
-        for row in rows:
-            for k in feature_keys:
-                key : float = row.get(k,0.0) # return 0.0 if key not found
-                x.append(key) # Extract each value from dicts
+# ------- PLOT #2: CPU Usage -------
+plt.figure(figsize=(10,4))
+plt.scatter(df["timestamp"], df["cpuusage"], s=10)
+plt.title("CPU Usage vs Time")
+plt.xlabel("Time")
+plt.ylabel("CPU Usage")
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
 
-                label : str = row.get(label_key, "Healthy")
-                if label not in label_to_id:
-                    label_to_id[label] = next_id
-                    next_id += 1
-                    y.append(label_to_id[label])
+# ------- PLOT #3: Used Storage -------
+plt.figure(figsize=(10,4))
+plt.scatter(df["timestamp"], df["used_storage"], s=10)
+plt.title("Used Storage vs Time")
+plt.xlabel("Time")
+plt.ylabel("Used Storage")
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
 
-        x = np.array(x, dtype = float)
-        y = np.array(y, dtype = int)
+# ------- PLOT #4: Temperature -------
+plt.figure(figsize=(10,4))
+plt.scatter(df["timestamp"], df["temperature"], s=10)
+plt.title("Temperature vs Time")
+plt.xlabel("Time")
+plt.ylabel("Temperature")
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+
+
+# ======================================================
+#                   COMBINED FOUR-GRAPH PLOT
+# ======================================================
+
+plt.figure(figsize=(12,6))
+
+plt.scatter(df["timestamp"], df["used_memory"], color="red", label="Used Memory")
+plt.scatter(df["timestamp"], df["cpuusage"], color="blue", label="CPU Usage")
+plt.scatter(df["timestamp"], df["used_storage"], color="green", label="Used Storage")
+plt.scatter(df["timestamp"], df["temperature"], color="yellow", label="Temperature")
+
+
+plt.title("All Metrics vs Time")
+plt.xlabel("Time")
+plt.ylabel("Metric Values")
+plt.xticks(rotation=45)
+plt.legend()
+plt.tight_layout()
+plt.show()
