@@ -8,6 +8,8 @@ class BaseService:
     
     def start(self) -> None:
         self.running = True;# Start the service
+        print(f"[{self.name}] started");
     
     def stop(self):
         self.running = False;# Stop the service
+        print(f"[{self.name}] stopped");
