@@ -160,6 +160,9 @@ class AIModel(BaseService):
     # INFERENCE
     # ----------------------------
     def predict_status(self, metrics: Dict[str, float]) -> Tuple[str, str]:
+
+        print("Metrics sent to AI:", metrics)   # Testing to see if metrics are received correctly
+        
         if self.artifacts is None:
             raise RuntimeError("AIModel not loaded/trained yet.")
 
