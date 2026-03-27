@@ -5,10 +5,12 @@
 
 
 # import pandas as pd
+import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 
 # ------- LOAD CSV -------
-df = pd.read_csv("Diagnostic_Data/Diagnostic_Data.csv", low_memory=False)
+df = pd.read_csv("PLC AI project Capstone/Diagnostic_Data/axin-ep-ph_2026-02-23 00_00_00_messagesdiagnostic.csv", low_memory=False)
 
 # ------- CLEAN DATA (remove null rows) -------
 df = df.dropna(subset=[
@@ -91,3 +93,50 @@ plt.xticks(rotation=45)
 plt.legend()
 plt.tight_layout()
 plt.show()
+
+
+# Temperature at restart events
+# First plot, Used memory drop vs temp
+# Second plot, Used storage drop vs temp
+
+def plot_temperature_at_restarts_auto(df, metric_col, title_suffix, k=5):
+    diff_col = f"{metric_col}_diff"
+    df[diff_col] = df[metric_col].diff()
+
+    # Show the biggest drops so you can see what "real restart" looks like
+    biggest_drops = df[diff_col].dropna().sort_values().head(15)
+    print(f"\n{title_suffix} - biggest drops (most negative):")
+    print(biggest_drops)
+
+    # Auto-threshold: take the k-th biggest drop as the cutoff
+    # (k=5 usually matches your “4–5 restarts” expectation)
+    threshold = biggest_drops.iloc[k-1]
+    print(f"{title_suffix} - using threshold <= {threshold}")
+
+    restarts = df[df[diff_col] <= threshold].copy()
+    restarts = restarts.sort_values("timestamp")
+    restarts["restart_id"] = range(1, len(restarts) + 1)
+
+    if restarts.empty:
+        print(f"{title_suffix}: No restarts found even with auto threshold.")
+        return
+
+    plt.figure(figsize=(8, 5))
+    plt.scatter(restarts["restart_id"], restarts["temperature"], s=120)
+
+    plt.axhline(df["temperature"].mean(), linestyle="--", label="Average Operating Temperature")
+    plt.title(f"Temperature at Restart Events ({title_suffix})")
+    plt.xlabel("Restart Event")
+    plt.ylabel("Temperature")
+    plt.legend(loc="upper right")
+    plt.tight_layout()
+    plt.show()
+
+    print(f"{title_suffix}: plotted {len(restarts)} restart events")
+
+
+# ---- Used Memory ----
+plot_temperature_at_restarts_auto(df, "used_memory", "Restart = Used Memory Drop", k=5)
+
+# ---- Used Storage ----
+plot_temperature_at_restarts_auto(df, "used_storage", "Restart = Used Storage Drop", k=5)
